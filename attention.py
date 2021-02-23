@@ -11,7 +11,6 @@ class SqueezeAttention2D(layers.Layer):
 
     def build(self, input_shape):
         self.input_channels = input_shape[1]
-        print("input_channels:", input_channels)
         self.fc1 = layers.Dense(self.input_channels//self.ratio, activation='relu')
         self.fc2 = layers.Dense(self.input_channels, activation='hard_sigmoid')
         self.restore_shape = layers.Reshape(target_shape=(self.input_channels, 1, 1))
