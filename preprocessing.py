@@ -1,4 +1,5 @@
 import tensorflow as tf
+from tensorflow.keras import layers
 import numpy as np
 import glob
 import os
@@ -60,11 +61,13 @@ def augment_wrapper(x, y):
     img, lbl = augment((x, y), seed)
     return img, lbl
 
-data_augmentation = tf.keras.Sequential([                       # over batches
-    layers.experimental.preprocessing.RandomFlip("horizontal"),
-    layers.experimental.preprocessing.RandomHeight(0.3),
-    layers.experimental.preprocessing.RandomWidth(0.3),
-    layers.experimental.preprocessing.RandomTranslation(0.3,0.3),
-    layers.experimental.preprocessing.RandomRotation(0.12),     # 0.12 * 2pi = 43.2 deg
-    layers.experimental.preprocessing.Resizing(img_height, img_width)
-])
+def get_augmentation_layers():
+    data_augmentation = tf.keras.Sequential([                       # over batches
+        layers.experimental.preprocessing.RandomFlip("horizontal"),
+        layers.experimental.preprocessing.RandomHeight(0.3),
+        layers.experimental.preprocessing.RandomWidth(0.3),
+        layers.experimental.preprocessing.RandomTranslation(0.3,0.3),
+        layers.experimental.preprocessing.RandomRotation(0.12),     # 0.12 * 2pi = 43.2 deg
+        layers.experimental.preprocessing.Resizing(img_height, img_width)
+    ])
+    return data_augmentation
