@@ -3,6 +3,7 @@ import tensorflow.keras.layers as layers
 
 from attention import SqueezeAttention2D, AddPositionalEmbeddings, MultiHeadAttention2D
 
+
 def norm_act(x, gn_grps=8, activation=tf.nn.leaky_relu):
     norm = CONFIG.norm
     if norm == 'gn':
@@ -81,19 +82,6 @@ def block_conv_attn(inp, filters, strides=1, activation=tf.nn.leaky_relu,
     else:
         return x
 
-# decisive_depth
-# x = block(args)(x)
-# gp = globalpool(x)
-# gamma = dense(1)(gp) # sigmoid or simply relu
-# next_block = block(args)
-# def call(args):         # or process in batch and mask with 0
-#     x, next_block, gamma = args
-#     if gamma > 0.5:
-#         x = next_block(x)
-#     else:
-#         x = pool(x) (if stride>1 else x) or pointwise(x)
-# x = tf.map_fn(call, (x, next_block, gamma))
-# x = block(args)(x)
 
 def down_stack(x, fltrs=[8,16,16], strides=2, self_attn=[False,False,False],
                fscales=[4,4,4], down_attn=False, squeeze_attn=True, dp_rate=0.2,
