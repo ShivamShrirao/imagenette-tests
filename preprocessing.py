@@ -37,20 +37,21 @@ def process_val_path(file_path):
     return img, label
 
 def channel_first_and_normalize(img, lbl, mean, std):    # over batches
-    img = tf.transpose(img, perm=[0,3,1,2])
-    img = img - mean
-    img = img / std
+    with tf.device('/device:GPU:0'):
+        img = tf.transpose(img, perm=[0,3,1,2])
+        img = img - mean
+        img = img / std
     return img, lbl
 
 
-def augment(img_lbl, seed):         # over individual image
+def augment(img_lbl, seed):         # over batches
     img, lbl = img_lbl
     # Make a new seed
     new_seed = tf.random.experimental.stateless_split(seed, num=1)[0, :]
-    img = tf.image.stateless_random_contrast(img, 0.5, 1, seed)
-    img = tf.image.stateless_random_hue(img, 0.05, new_seed)
     img = tf.image.stateless_random_saturation(img, 0.4, 2, seed)
+    img = tf.image.stateless_random_hue(img, 0.05, new_seed)
     img = tf.image.stateless_random_brightness(img, 0.2, new_seed)
+    img = tf.image.stateless_random_contrast(img, 0.5, 1, seed)
     img = tf.clip_by_value(img, 0, 1)
     return img, lbl
 
@@ -58,7 +59,8 @@ rng = tf.random.Generator.from_seed(123, alg='philox')
 # A wrapper function for updating seeds
 def augment_wrapper(x, y):
     seed = rng.make_seeds(2)[0]
-    img, lbl = augment((x, y), seed)
+    with tf.device('/device:GPU:0'):
+        img, lbl = augment((x, y), seed)
     return img, lbl
 
 def get_augmentation_layers():
