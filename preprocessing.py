@@ -50,7 +50,6 @@ def augment(img, lbl, seed):         # over batches
     img = tf.image.stateless_random_saturation(img, 0.3, 3, seed)
     img = tf.image.stateless_random_hue(img, 0.08, new_seed)
     img = tf.image.stateless_random_contrast(img, 0.4, 1, seed)
-    img = tf.image.stateless_random_jpeg_quality(img, 20, 100, new_seed)
     img = tf.image.stateless_random_brightness(img, 0.3, new_seed)
     img = tf.clip_by_value(img, 0, 1)
     return img, lbl
@@ -65,10 +64,10 @@ def augment_wrapper(x, y):
 
 def get_augmentation_layers():
     data_augmentation = tf.keras.Sequential([                       # over batches
-        layers.experimental.preprocessing.RandomFlip("horizontal"),
+        layers.experimental.preprocessing.RandomFlip("horizontal_and_vertical"),
         layers.experimental.preprocessing.RandomHeight(0.5),
         layers.experimental.preprocessing.RandomWidth(0.5),
-        layers.experimental.preprocessing.RandomTranslation(0.4,0.4),
+        layers.experimental.preprocessing.RandomTranslation(0.5,0.5),
         layers.experimental.preprocessing.RandomRotation(0.15),     # 0.12 * 2pi = 43.2 deg
         layers.experimental.preprocessing.Resizing(img_height, img_width)
     ])
