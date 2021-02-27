@@ -55,8 +55,9 @@ def block_conv_attn(inp, filters, strides=1, activation=tf.nn.leaky_relu,
     dk = int(filters * frac_dk)
     dv = int(filters * frac_dv)
     cf = filters - dv if self_attn else filters
-    x_s = conv_norm(x, cf, kernel_size=3, strides=strides, activation=activation,
-                    do_norm_act=False)
+    if cf:
+        x_s = conv_norm(x, cf, kernel_size=3, strides=strides, activation=activation,
+                        do_norm_act=False)
 
     if self_attn:
         if down_attn or strides > 1:                               # reduce size to save space or if conv does downsample and not for deconv as it increases so done during restore.
@@ -64,7 +65,7 @@ def block_conv_attn(inp, filters, strides=1, activation=tf.nn.leaky_relu,
         o, kq = MultiHeadAttention2D(x, kq, dk=dk, dv=dv, nheads=nheads, pos_emb=pos_emb)
         if (down_attn and strides < 2):                 # restore if previously reduced or if deconv does upsample.
             o = layers.UpSampling2D(data_format="channels_first")(o)
-        x_s = layers.Concatenate(axis=1)([o, x_s])
+        x_s = layers.Concatenate(axis=1)([o, x_s]) if cf else o
 
     x = norm_act(x_s, activation=activation)
     x = conv_norm(x, fscale*filters, kernel_size=1, activation=activation, do_norm_act=False) # expand
