@@ -23,11 +23,7 @@ def conv_norm(x, filters, kernel_size=3, strides=1, activation=tf.nn.relu, do_no
 
 
 def BasicBlock(inp, filters, strides=1, activation=tf.nn.relu, dp_rate=0,
-               make_model=False, suffix=1, *args, **kwargs):
-
-    if make_model:                  # to group block layers into a model (just ignore)
-        svd_inp = inp
-        inp = layers.Input(shape=inp.shape[1:])
+               suffix=1, *args, **kwargs):
 
     in_filters = inp.shape[-1]
 
@@ -48,19 +44,11 @@ def BasicBlock(inp, filters, strides=1, activation=tf.nn.relu, dp_rate=0,
 
     x = layers.Add()([identity, x])
 
-    if make_model:                  #  (just ignore)
-        m = tf.keras.Model(inputs=inp, outputs=x, name=f"BasicBlock_{suffix}")
-        return m(svd_inp)
-    else:
-        return x
+    return x
 
 
 def Bottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4,
-               dp_rate=0, make_model=False, suffix=1, *args, **kwargs):
-
-    if make_model:                  # to group block layers into a model (just ignore)
-        svd_inp = inp
-        inp = layers.Input(shape=inp.shape[1:])
+               dp_rate=0, suffix=1, *args, **kwargs):
 
     in_filters = inp.shape[1]
     out_filters = filters*expansion
@@ -85,20 +73,12 @@ def Bottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4,
 
     x = layers.Add()([identity, x])
 
-    if make_model:                  #  (just ignore)
-        m = tf.keras.Model(inputs=inp, outputs=x, name=f"Bottleneck_{suffix}")
-        return m(svd_inp)
-    else:
-        return x
+    return x
 
 
 def AttnBottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4,
-               dp_rate=0, make_model=False, suffix=1, self_attn=False, nheads=8,
-               pos_emb=True, frac_dk=0.5, frac_dv=0.25, *args, **kwargs):
-
-    if make_model:                  # to group block layers into a model (just ignore)
-        svd_inp = inp
-        inp = layers.Input(shape=inp.shape[1:])
+                   dp_rate=0, suffix=1, self_attn=False, nheads=8, pos_emb=True,
+                   frac_dk=0.5, frac_dv=0.25, *args, **kwargs):
 
     in_filters = inp.shape[-1]
     out_filters = filters*expansion
@@ -120,7 +100,7 @@ def AttnBottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4,
     dv = int(filters * frac_dv)
     cf = filters - dv if self_attn else filters
     if cf:
-        x_c = conv_norm(x, cf, kernel_size=3, strides=strides, activation=activation,
+        x_c = conv_norm(x, cf, kernel_size=3, activation=activation, strides=strides,
                         do_norm_act=False)
 
     if self_attn:
@@ -142,8 +122,4 @@ def AttnBottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4,
 
     x = layers.Add()([identity, x])
 
-    if make_model:                  #  (just ignore)
-        m = tf.keras.Model(inputs=inp, outputs=x, name=f"Bottleneck_{suffix}")
-        return m(svd_inp)
-    else:
-        return x
+    return x
