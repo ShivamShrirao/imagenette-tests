@@ -9,7 +9,7 @@ from resblock import norm_act, conv_norm, BasicBlock, Bottleneck, AttnBottleneck
 class Resnet():
     def __init__(self, block, filters_per_stack=[64, 128, 256, 512], num_repeats=[3,4,6,3], strides=[2,2,2,1],
                  expansion=4, dp_rate=0, activation=tf.nn.relu, inputs=None, input_shape=(224, 224, 3),
-                 num_classes=1000, self_attn=False, nheads=8, pos_emb=True, frac_dk=0.5, frac_dv=0.25):
+                 num_classes=1000, self_attn=[False]*4, nheads=8, pos_emb=True, frac_dk=0.5, frac_dv=0.25):
         self.block = block
         self.dp_rate = dp_rate
         self.activation = activation
@@ -25,8 +25,8 @@ class Resnet():
         self.filters_per_stack = filters_per_stack
         self.num_repeats = num_repeats
         self.strides = strides
+        self.self_attn = self_attn
         self.attn_args = {
-                            "self_attn"   : self_attn,
                             "nheads"      : nheads,
                             "pos_emb"     : pos_emb,
                             "frac_dk"     : frac_dk,
@@ -47,7 +47,7 @@ class Resnet():
         # body
         for i in range(len(self.filters_per_stack)):
             x = self.stack(x, self.block, self.filters_per_stack[i], self.strides[i], repeat=self.num_repeats[i],
-                      dp_rate=self.dp_rate)
+                      dp_rate=self.dp_rate, self_attn=self.self_attn[i])
 
         x = norm_act(x)
         if not include_top:
@@ -58,15 +58,15 @@ class Resnet():
             x = layers.Softmax(axis=-1)(x)
             return x
 
-    def stack(self, x, block, filters, stride1=2, dp_rate=0, repeat=3, suffix=1):
+    def stack(self, x, block, filters, stride1=2, dp_rate=0, repeat=3, suffix=1, self_attn=False):
         for i in range(repeat-1):
             x = block(x, filters, strides=1, activation=self.activation, 
                        expansion=self.expansion, dp_rate=dp_rate, make_model=False,
-                       suffix=f"{suffix}_block{i}", **self.attn_args)
+                       suffix=f"{suffix}_block{i}", self_attn=self_attn, **self.attn_args)
         i+= 1
         x = block(x, filters, strides=stride1, activation=self.activation, 
                        expansion=self.expansion, dp_rate=dp_rate, make_model=False,
-                       suffix=f"{suffix}_block{i}", **self.attn_args)
+                       suffix=f"{suffix}_block{i}", self_attn=self_attn, **self.attn_args)
         return x
 
 

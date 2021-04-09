@@ -72,6 +72,4 @@ def MultiHeadAttention2D(inp, prev_kq=None, dk=None, dv=None, nheads=8, pos_emb=
 
     o = MatMulLayer()([v_f, attn_map])              # [B, N, dv/N, H*W]
     o = layers.Reshape([dv]+inp.shape[-2:])(o)      # [B, dv, H, W]      # if reshaping gives error for None dim, use Lambda Layer and reshape in that.
-    o = layers.Conv2D(filters=dv, kernel_size=1, strides=1, padding='same',
-                      data_format='channels_first')(o)      # [B, dv, H, W]
     return o, kq
