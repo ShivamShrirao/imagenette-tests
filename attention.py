@@ -37,12 +37,14 @@ class AddPositionalEmbeddings(layers.Layer):
         super().__init__(**kwargs)
     
     def build(self, input_shape):
-        H, W = input_shape[-2:]
-        self.embedding_H = self.add_weight("pos_H", shape=(1, 1, H, 1), initializer="truncated_normal", trainable=True)
-        self.embedding_W = self.add_weight("pos_W", shape=(1, 1, 1, W), initializer="truncated_normal", trainable=True)
+        kq, q_f = input_shape
+        HW = kq[-1]
+        dim_dk = q_f[-2]
+        self.embedding = self.add_weight("pos_emb", shape=(1, 1, HW, dim_dk), initializer="truncated_normal", trainable=True)
     
     def call(self, inp):
-        return self.embedding_H + self.embedding_W + inp
+        kq, q_f = inp
+        return kq + tf.matmul(self.embedding, q_f)
 
 
 def MultiHeadAttention2D(inp, prev_kq=None, dk=None, dv=None, nheads=8, pos_emb=True, name=""):   # inp [B, C, H, W]
@@ -64,7 +66,7 @@ def MultiHeadAttention2D(inp, prev_kq=None, dk=None, dv=None, nheads=8, pos_emb=
     if prev_kq is not None:
         kq = layers.Add()([kq, prev_kq])
     if pos_emb:
-        kq = AddPositionalEmbeddings()(kq)          # [B, N, H*W, H*W]  # as in attention augmented convolution paper
+        kq = AddPositionalEmbeddings()([kq, q_f])   # [B, N, H*W, H*W]  # as in attention augmented convolution paper
 
     attn_map = layers.Softmax(axis=-1)(kq)          # [B, N, H*W, H*W]  # or TANH or SIGMOID ???
 
