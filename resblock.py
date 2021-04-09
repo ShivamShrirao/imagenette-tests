@@ -13,11 +13,10 @@ def norm_act(x, activation=tf.nn.relu):
     return x
 
 
-def conv_norm(x, filters, kernel_size=3, strides=1, activation=tf.nn.relu,
-              do_norm_act=True):
+def conv_norm(x, filters, kernel_size=3, strides=1, activation=tf.nn.relu, do_norm_act=True):
 
     x = layers.Conv2D(filters, kernel_size=kernel_size, strides=strides, padding='same',
-                      data_format="channels_first")(x)
+                      use_bias=not do_norm_act, data_format="channels_first")(x)
     if do_norm_act:
         x = norm_act(x, activation=activation)
     return x
@@ -35,7 +34,7 @@ def BasicBlock(inp, filters, strides=1, activation=tf.nn.relu, dp_rate=0,
     x = norm_act(inp, activation=activation)
 
     if in_filters != filters:   # use conv_shortcut to increase the filters of identity.
-        identity = conv_norm(x, filters, strides=1, activation=activation, do_norm_act=False)
+        identity = conv_norm(x, filters, kernel_size=1, strides=1, activation=activation, do_norm_act=False)
     elif strides > 1:               # else just downsample or conv1x1 with strides can be tried.
         identity = layers.MaxPool2D(data_format="channels_first")(inp)
     else:                           # or keep the same.
@@ -71,7 +70,7 @@ def Bottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4,
     identity = inp
     conv_shortcut = False
     if in_filters != out_filters:   # use conv_shortcut to increase the filters of identity.
-        identity = conv_norm(x, out_filters, strides=1, activation=activation, do_norm_act=False)
+        identity = conv_norm(x, out_filters, kernel_size=1, strides=1, activation=activation, do_norm_act=False)
         conv_shortcut = True
     if strides > 1:
         mip = identity if conv_shortcut else inp
@@ -109,7 +108,7 @@ def AttnBottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4,
     identity = inp
     conv_shortcut = False
     if in_filters != out_filters:   # use conv_shortcut to increase the filters of identity.
-        identity = conv_norm(x, out_filters, strides=1, activation=activation, do_norm_act=False)
+        identity = conv_norm(x, out_filters, kernel_size=1, strides=1, activation=activation, do_norm_act=False)
         conv_shortcut = True
     if strides > 1:
         mip = identity if conv_shortcut else inp
