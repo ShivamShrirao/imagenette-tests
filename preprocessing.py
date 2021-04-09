@@ -39,8 +39,7 @@ def process_val_path(file_path):
 def channel_first_and_normalize(img, lbl, mean, std):    # over batches
     with tf.device('/device:GPU:0'):
         img = tf.transpose(img, perm=[0,3,1,2])
-        img = img - mean
-        img = img / std
+        img = (img - mean) / std
     return img, lbl
 
 

@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tensorflow.keras.layers as layers
 
-from attention import SqueezeAttention2D, AddPositionalEmbeddings, MultiHeadAttention2D
+from attention import SqueezeAttention2D, MultiHeadAttention2D
 
 
 def norm_act(x, gn_grps=8, activation=tf.nn.leaky_relu):
@@ -74,7 +74,8 @@ def block_conv_attn(inp, filters, strides=1, activation=tf.nn.leaky_relu,
         x = SqueezeAttention2D()(x)
 
     if dp_rate:
-        x = layers.Dropout(dp_rate)(x)
+        # x = layers.Dropout(dp_rate)(x)
+        x = layers.SpatialDropout2D(dp_rate, data_format="channels_first")
 
     x = layers.Add()([shortcut, x])
     if make_model:
