@@ -19,6 +19,3 @@ class MatMulLayer(layers.Layer):
     def call(self, inputs):
         x = tf.matmul(inputs[0], inputs[1], transpose_a=self.transpose_a, transpose_b=self.transpose_b)
         return x
-    
-    def cast_inputs(self, inputs):
-        return self._mixed_precision_policy.cast_to_lowest(inputs)

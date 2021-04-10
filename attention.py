@@ -23,9 +23,6 @@ class SqueezeAttention2D(layers.Layer):
         x = inp * x
         return x
 
-    def cast_inputs(self, inp):
-        return self._mixed_precision_policy.cast_to_lowest(inp)
-    
     def get_config(self):
         l_config = {"ratio": self.ratio}
         base_config = super().get_config()
