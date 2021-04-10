@@ -78,34 +78,38 @@ def Resnet18(inputs=None,
              input_shape=(3,224,224),
              num_classes=1000,
              dp_rate=0,
-             activation=tf.nn.relu):
+             activation=tf.nn.relu,
+             block=BasicBlock):
 
-    return Resnet(BasicBlock, num_repeats=[2,2,2,2], inputs=inputs, input_shape=input_shape, num_classes=num_classes,
+    return Resnet(block, num_repeats=[2,2,2,2], inputs=inputs, input_shape=input_shape, num_classes=num_classes,
                   dp_rate=dp_rate, activation=activation)
 
 def Resnet34(inputs=None,
              input_shape=(3,224,224),
              num_classes=1000,
              dp_rate=0,
-             activation=tf.nn.relu):
+             activation=tf.nn.relu,
+             block=BasicBlock):
 
-    return Resnet(BasicBlock, num_repeats=[3,4,6,3], inputs=inputs, input_shape=input_shape, num_classes=num_classes,
+    return Resnet(block, num_repeats=[3,4,6,3], inputs=inputs, input_shape=input_shape, num_classes=num_classes,
                   dp_rate=dp_rate, activation=activation)
 
 def Resnet50(inputs=None,
              input_shape=(3,224,224),
              num_classes=1000,
              dp_rate=0,
-             activation=tf.nn.relu):
+             activation=tf.nn.relu,
+             block=Bottleneck):
 
-    return Resnet(Bottleneck, num_repeats=[3,4,6,3], inputs=inputs, input_shape=input_shape, num_classes=num_classes,
+    return Resnet(block, num_repeats=[3,4,6,3], inputs=inputs, input_shape=input_shape, num_classes=num_classes,
                   dp_rate=dp_rate, activation=activation)
 
 def Resnet101(inputs=None,
              input_shape=(3,224,224),
              num_classes=1000,
              dp_rate=0,
-             activation=tf.nn.relu):
+             activation=tf.nn.relu,
+             block=Bottleneck):
 
-    return Resnet(Bottleneck, num_repeats=[3,4,23,3], inputs=inputs, input_shape=input_shape, num_classes=num_classes,
+    return Resnet(block, num_repeats=[3,4,23,3], inputs=inputs, input_shape=input_shape, num_classes=num_classes,
                   dp_rate=dp_rate, activation=activation)
