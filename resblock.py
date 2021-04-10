@@ -80,7 +80,7 @@ def AttnBottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4,
                    dp_rate=0, suffix=1, self_attn=False, nheads=8, pos_emb=True,
                    frac_dk=0.5, frac_dv=0.25, down_attn=False, *args, **kwargs):
 
-    in_filters = inp.shape[-1]
+    in_filters = inp.shape[1]
     out_filters = filters*expansion
 
     x = norm_act(inp, activation=activation)
