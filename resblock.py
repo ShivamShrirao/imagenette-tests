@@ -29,12 +29,11 @@ def BasicBlock(inp, filters, strides=1, activation=tf.nn.relu, dp_rate=0,
 
     x = norm_act(inp, activation=activation)
 
+    identity = inp
     if in_filters != filters:   # use conv_shortcut to increase the filters of identity.
         identity = conv_norm(x, filters, kernel_size=1, strides=1, activation=activation, do_norm_act=False)
-    elif strides > 1:               # else just downsample or conv1x1 with strides can be tried.
+    elif strides > 1:           # else just downsample
         identity = layers.MaxPool2D(data_format="channels_first")(inp)
-    else:                           # or keep the same.
-        identity = inp
 
     x = conv_norm(x, filters, kernel_size=3, activation=activation, strides=strides)
     x = conv_norm(x, filters, kernel_size=3, activation=activation, do_norm_act=False)
