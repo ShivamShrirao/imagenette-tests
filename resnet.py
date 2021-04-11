@@ -7,7 +7,7 @@ from resblock import norm_act, conv_norm, BasicBlock, Bottleneck, AttnBottleneck
 
 
 class Resnet():
-    def __init__(self, block, filters_per_stack=[64, 128, 256, 512], num_repeats=[3,4,6,3], strides=[1,2,2,2],
+    def __init__(self, block, filters_per_stack=[64, 128, 256, 512], num_repeats=[3,4,6,3], strides=[2,2,2,1],
                  expansion=4, dp_rate=0, activation=tf.nn.relu, inputs=None, input_shape=(224, 224, 3),
                  num_classes=1000, groups=32, base_width=4, squeeze_reduce=0, self_attn=[False]*4, nheads=8,
                  pos_emb=True, frac_dk=0.5, frac_dv=0.25):
@@ -64,14 +64,14 @@ class Resnet():
 
     def stack(self, x, block, filters, stride1=2, dp_rate=0, repeat=3, squeeze_reduce=False,
               self_attn=False, suffix=0):
-        i = 0
-        x = block(x, filters, strides=stride1, activation=self.activation, groups=self.groups, base_width=self.base_width,
-                  expansion=self.expansion, dp_rate=dp_rate, squeeze_reduce=squeeze_reduce,
-                  suffix=f"{suffix}_block{i}", self_attn=self_attn, **self.attn_args)
-        for i in range(1, repeat):
+        for i in range(repeat-1):
             x = block(x, filters, strides=1, activation=self.activation, groups=self.groups, base_width=self.base_width,
                       expansion=self.expansion, dp_rate=dp_rate, squeeze_reduce=squeeze_reduce,
                       suffix=f"{suffix}_block{i}", self_attn=self_attn, **self.attn_args)
+        i+= 1
+        x = block(x, filters, strides=stride1, activation=self.activation, groups=self.groups, base_width=self.base_width,
+                  expansion=self.expansion, dp_rate=dp_rate, squeeze_reduce=squeeze_reduce,
+                  suffix=f"{suffix}_block{i}", self_attn=self_attn, **self.attn_args)
         
         return x
 
