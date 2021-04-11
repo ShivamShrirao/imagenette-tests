@@ -65,7 +65,7 @@ def Bottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4, dp_r
         identity = layers.MaxPool2D(data_format="channels_first")(mip)
 
     x = conv_norm(x, width, kernel_size=1, activation=activation)      # contract
-    x = conv_norm(x, width, kernel_size=3, activation=activation, strides=strides)
+    x = conv_norm(x, width, kernel_size=3, activation=activation, strides=strides, groups=groups)
     x = conv_norm(x, out_filters, kernel_size=1, activation=activation, do_norm_act=False) # expand
 
     if squeeze_reduce:
