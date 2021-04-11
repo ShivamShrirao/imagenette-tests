@@ -66,9 +66,9 @@ def Bottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4, dp_r
         mip = identity if conv_shortcut else inp
         identity = layers.MaxPool2D(data_format="channels_first")(mip)
 
-    x = conv_norm(x, width, kernel_size=1, activation=activation, suffix=suffix)      # contract
+    x = conv_norm(x, width, kernel_size=1, activation=activation, suffix="in_"+suffix)      # contract
     x = conv_norm(x, width, kernel_size=3, activation=activation, strides=strides, groups=groups, suffix=suffix)
-    x = conv_norm(x, out_filters, kernel_size=1, activation=activation, do_norm_act=False, suffix=suffix) # expand
+    x = conv_norm(x, out_filters, kernel_size=1, activation=activation, do_norm_act=False, suffix="out_"+suffix) # expand
 
     if squeeze_reduce:
         x = SqueezeAttention2D(squeeze_reduce)(x)
