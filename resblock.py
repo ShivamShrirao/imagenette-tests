@@ -13,10 +13,10 @@ def norm_act(x, activation=tf.nn.relu):
     return x
 
 
-def conv_norm(x, filters, kernel_size=3, strides=1, activation=tf.nn.relu, do_norm_act=True, suffix=0):
+def conv_norm(x, filters, kernel_size=3, strides=1, activation=tf.nn.relu, groups=1, do_norm_act=True, suffix=0):
     name = f"conv{kernel_size}x{kernel_size}_{suffix}" if suffix else None
     x = layers.Conv2D(filters, kernel_size=kernel_size, strides=strides, padding='same',
-                      use_bias=not do_norm_act, data_format="channels_first",
+                      use_bias=not do_norm_act, data_format="channels_first", groups=groups,
                       name=name)(x)
     if do_norm_act:
         x = norm_act(x, activation=activation)

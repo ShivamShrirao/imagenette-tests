@@ -65,11 +65,11 @@ class Resnet():
     def stack(self, x, block, filters, stride1=2, dp_rate=0, repeat=3, squeeze_reduce=False,
               self_attn=False, suffix=0):
         i = 0
-        x = block(x, filters, strides=stride1, activation=self.activation, groups=self.groups, base_width=self.base_width
+        x = block(x, filters, strides=stride1, activation=self.activation, groups=self.groups, base_width=self.bae_width,
                   expansion=self.expansion, dp_rate=dp_rate, squeeze_reduce=squeeze_reduce,
                   suffix=f"{suffix}_block{i}", self_attn=self_attn, **self.attn_args)
         for i in range(1, repeat):
-            x = block(x, filters, strides=1, activation=self.activation, groups=self.groups, base_width=self.base_width
+            x = block(x, filters, strides=1, activation=self.activation, groups=self.groups, base_width=self.base_width,
                       expansion=self.expansion, dp_rate=dp_rate, squeeze_reduce=squeeze_reduce,
                       suffix=f"{suffix}_block{i}", self_attn=self_attn, **self.attn_args)
         
