@@ -4,7 +4,7 @@ import tensorflow.keras.layers as layers
 from utils import MatMulLayer
 
 class SqueezeAttention2D(layers.Layer):
-    def __init__(self, ratio=4, **kwargs):
+    def __init__(self, ratio=16, **kwargs):
         super().__init__(**kwargs)
         self.ratio = ratio
         self.gpool = layers.GlobalAveragePooling2D(data_format='channels_first')
