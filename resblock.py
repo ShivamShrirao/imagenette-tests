@@ -46,11 +46,12 @@ def BasicBlock(inp, filters, strides=1, activation=tf.nn.relu, dp_rate=0,
     return x
 
 
-def Bottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4,
-               dp_rate=0, suffix=1, *args, **kwargs):
+def Bottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4, dp_rate=0,
+               groups=1, base_width=64, squeeze_reduce=0, suffix=1, *args, **kwargs):
 
     in_filters = inp.shape[1]
     out_filters = filters*expansion
+    width = int(filters * (base_width / 64.)) * groups
 
     x = norm_act(inp, activation=activation)
 
@@ -63,9 +64,12 @@ def Bottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4,
         mip = identity if conv_shortcut else inp
         identity = layers.MaxPool2D(data_format="channels_first")(mip)
 
-    x = conv_norm(x, filters, kernel_size=1, activation=activation)      # contract
-    x = conv_norm(x, filters, kernel_size=3, activation=activation, strides=strides)
+    x = conv_norm(x, width, kernel_size=1, activation=activation)      # contract
+    x = conv_norm(x, width, kernel_size=3, activation=activation, strides=strides)
     x = conv_norm(x, out_filters, kernel_size=1, activation=activation, do_norm_act=False) # expand
+
+    if squeeze_reduce:
+        x = SqueezeAttention2D(squeeze_reduce)(x)
 
     if dp_rate:
         x = layers.Dropout(dp_rate)(x)
