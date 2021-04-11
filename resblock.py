@@ -13,10 +13,11 @@ def norm_act(x, activation=tf.nn.relu):
     return x
 
 
-def conv_norm(x, filters, kernel_size=3, strides=1, activation=tf.nn.relu, do_norm_act=True):
-
+def conv_norm(x, filters, kernel_size=3, strides=1, activation=tf.nn.relu, do_norm_act=True, suffix=0):
+    name = f"conv{kernel_size}x{kernel_size}_{suffix}" if suffix else None
     x = layers.Conv2D(filters, kernel_size=kernel_size, strides=strides, padding='same',
-                      use_bias=not do_norm_act, data_format="channels_first")(x)
+                      use_bias=not do_norm_act, data_format="channels_first",
+                      name=name)(x)
     if do_norm_act:
         x = norm_act(x, activation=activation)
     return x
@@ -47,7 +48,7 @@ def BasicBlock(inp, filters, strides=1, activation=tf.nn.relu, dp_rate=0,
 
 
 def Bottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4, dp_rate=0,
-               groups=1, base_width=64, squeeze_reduce=0, suffix=1, *args, **kwargs):
+               groups=1, base_width=64, squeeze_reduce=0, suffix=0, *args, **kwargs):
 
     in_filters = inp.shape[1]
     out_filters = filters*expansion
@@ -58,15 +59,16 @@ def Bottleneck(inp, filters, strides=1, activation=tf.nn.relu, expansion=4, dp_r
     identity = inp
     conv_shortcut = False
     if in_filters != out_filters:   # use conv_shortcut to increase the filters of identity.
-        identity = conv_norm(x, out_filters, kernel_size=1, strides=1, activation=activation, do_norm_act=False)
+        identity = conv_norm(x, out_filters, kernel_size=1, strides=1, activation=activation, do_norm_act=False,
+                             suffix="identity_"+suffix)
         conv_shortcut = True
     if strides > 1:
         mip = identity if conv_shortcut else inp
         identity = layers.MaxPool2D(data_format="channels_first")(mip)
 
-    x = conv_norm(x, width, kernel_size=1, activation=activation)      # contract
-    x = conv_norm(x, width, kernel_size=3, activation=activation, strides=strides, groups=groups)
-    x = conv_norm(x, out_filters, kernel_size=1, activation=activation, do_norm_act=False) # expand
+    x = conv_norm(x, width, kernel_size=1, activation=activation, suffix=suffix)      # contract
+    x = conv_norm(x, width, kernel_size=3, activation=activation, strides=strides, groups=groups, suffix=suffix)
+    x = conv_norm(x, out_filters, kernel_size=1, activation=activation, do_norm_act=False, suffix=suffix) # expand
 
     if squeeze_reduce:
         x = SqueezeAttention2D(squeeze_reduce)(x)

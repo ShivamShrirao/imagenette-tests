@@ -51,7 +51,7 @@ class Resnet():
         # body
         for i in range(len(self.filters_per_stack)):
             x = self.stack(x, self.block, self.filters_per_stack[i], self.strides[i], repeat=self.num_repeats[i],
-                      dp_rate=self.dp_rate, squeeze_reduce=self.squeeze_reduce, self_attn=self.self_attn[i])
+                      dp_rate=self.dp_rate, squeeze_reduce=self.squeeze_reduce, self_attn=self.self_attn[i], suffix=i)
 
         x = norm_act(x)
         if not include_top:
@@ -62,8 +62,8 @@ class Resnet():
             x = layers.Softmax(axis=-1)(x)
             return x
 
-    def stack(self, x, block, filters, stride1=2, dp_rate=0, repeat=3, suffix=1, squeeze_reduce=False,
-              self_attn=False):
+    def stack(self, x, block, filters, stride1=2, dp_rate=0, repeat=3, squeeze_reduce=False,
+              self_attn=False, suffix=0):
         i = 0
         x = block(x, filters, strides=stride1, activation=self.activation, groups=self.groups, base_width=self.base_width
                   expansion=self.expansion, dp_rate=dp_rate, squeeze_reduce=squeeze_reduce,
