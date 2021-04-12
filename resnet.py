@@ -46,7 +46,7 @@ class Resnet():
         x = self.inputs
         # stem
         x = conv_norm(x, 64, kernel_size=7, strides=2, activation=self.activation, do_norm_act=False)
-        x = layers.ZeroPadding2D(padding=((1, 1), (1, 1)))(x)
+        x = layers.ZeroPadding2D(padding=((1, 1), (1, 1)), data_format="channels_first")(x)
         x = layers.MaxPool2D(3, strides=2, data_format="channels_first")(x)
 
         # body
